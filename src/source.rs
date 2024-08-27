@@ -1,7 +1,4 @@
-use bevy::{
-    asset::io::{AssetReader, AssetReaderError, PathStream, Reader, VecReader},
-    utils::BoxedFuture,
-};
+use bevy::asset::io::{AssetReader, AssetReaderError, PathStream, Reader, VecReader};
 use js_sys::{Uint8Array, JSON};
 use std::{
     path::{Path, PathBuf},
@@ -44,47 +41,30 @@ impl BlobAssetReader {
 }
 
 impl AssetReader for BlobAssetReader {
-    fn read<'a>(
-        &'a self,
-        path: &'a Path,
-    ) -> BoxedFuture<'a, Result<Box<Reader<'a>>, AssetReaderError>> {
-        Box::pin(async move {
-            let path = deserialize_path(path);
-            self.fetch_bytes(path).await
-        })
+    async fn read<'a>(&'a self, path: &'a Path) -> Result<Box<Reader<'a>>, AssetReaderError> {
+        let path = deserialize_path(path);
+        self.fetch_bytes(path).await
     }
-    fn read_meta<'a>(
-        &'a self,
-        path: &'a Path,
-    ) -> BoxedFuture<'a, Result<Box<Reader<'a>>, AssetReaderError>> {
-        Box::pin(async move {
-            let path = deserialize_path(path);
-            self.fetch_bytes(path).await
-        })
+    async fn read_meta<'a>(&'a self, path: &'a Path) -> Result<Box<Reader<'a>>, AssetReaderError> {
+        let path = deserialize_path(path);
+        self.fetch_bytes(path).await
     }
 
-    fn read_directory<'a>(
+    async fn read_directory<'a>(
         &'a self,
         _path: &'a Path,
-    ) -> BoxedFuture<'a, Result<Box<PathStream>, AssetReaderError>> {
-        Box::pin(async move {
-            Err(AssetReaderError::Io(Arc::new(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                "BlobAssetReader does not support reading directories",
-            ))))
-        })
+    ) -> Result<Box<PathStream>, AssetReaderError> {
+        Err(AssetReaderError::Io(Arc::new(std::io::Error::new(
+            std::io::ErrorKind::Unsupported,
+            "BlobAssetReader does not support reading directories",
+        ))))
     }
 
-    fn is_directory<'a>(
-        &'a self,
-        _path: &'a Path,
-    ) -> BoxedFuture<'a, Result<bool, AssetReaderError>> {
-        Box::pin(async move {
-            Err(AssetReaderError::Io(Arc::new(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                "BlobAssetReader does not support reading directories",
-            ))))
-        })
+    async fn is_directory<'a>(&'a self, _path: &'a Path) -> Result<bool, AssetReaderError> {
+        Err(AssetReaderError::Io(Arc::new(std::io::Error::new(
+            std::io::ErrorKind::Unsupported,
+            "BlobAssetReader does not support reading directories",
+        ))))
     }
 }
 
